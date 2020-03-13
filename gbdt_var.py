@@ -8,7 +8,7 @@ from scipy.stats import ks_2samp
 import gc
 
 
-def get_gbdt_path_var(data, model, y=None, one_hot=True, char_cols=[], precision=6):
+def get_gbdt_path_var(data, model, y=None, one_hot=False, char_cols=[], precision=6):
     '''
     根据数据集和GBDT模型,输出按照GBDT的路径衍生的变量:
     ------------------------------------------------------------
@@ -48,8 +48,10 @@ def get_gbdt_path_var(data, model, y=None, one_hot=True, char_cols=[], precision
         for col_old in char_cols:
             for col_new in mapper_cols:
                 if col_old in col_new:
-                    col_judge_trans['%s > 0.5' % col_new] = '%s == %s' % (col_old, col_new.split('_')[-1])
-                    col_judge_trans['%s <= 0.5' % col_new] = '%s != %s' % (col_old, col_new.split('_')[-1])
+                    col_judge_trans['%s > 0.5' % col_new] = '%s == %s' % (
+                        col_old, col_new.split('_')[-1])
+                    col_judge_trans['%s <= 0.5' % col_new] = '%s != %s' % (
+                        col_old, col_new.split('_')[-1])
 
     # 如果未训练模型,这里训练模型
     if isinstance(y, type(None)) is False:
@@ -66,13 +68,14 @@ def get_gbdt_path_var(data, model, y=None, one_hot=True, char_cols=[], precision
 
         # 遍历每颗子树内部情况
         for line in export_graphviz(
-            model.estimators_[n, 0], feature_names=mapper_cols, precision=precision).split('\n'):
+                model.estimators_[n, 0], feature_names=mapper_cols, precision=precision).split('\n'):
             # 获取现节点的索引
             if '[label=' in line:
                 node = int(line[: line.find('[') - 1])
                 # 如果现节点有条件判断，保存条件
                 if 'label="friedman_mse' not in line:
-                    node_judge[node] = line[line.find('label="') + 7: line.find('\\nfriedman_mse')]
+                    node_judge[node] = line[line.find(
+                        'label="') + 7: line.find('\\nfriedman_mse')]
 
             # 上一个节点到下一个节点的路径
             if '->' in line:
@@ -80,9 +83,11 @@ def get_gbdt_path_var(data, model, y=None, one_hot=True, char_cols=[], precision
                 node_before = int(line[: line.find('->') - 1])
                 # 获取下一个节点的索引
                 if '[' in line:
-                    node_after = int(line[line.find('->') + 3: line.find('[') - 1])
+                    node_after = int(line[line.find(
+                        '->') + 3: line.find('[') - 1])
                 else:
-                    node_after = int(line[line.find('->') + 3: line.find(';') - 1])
+                    node_after = int(
+                        line[line.find('->') + 3: line.find(';') - 1])
 
                 # 如果上一个节点第一次分裂（上一个节点的条件判断是>=）
                 if node_before not in head_label:
@@ -91,12 +96,14 @@ def get_gbdt_path_var(data, model, y=None, one_hot=True, char_cols=[], precision
                     if node_before == 0:
                         path_dict[node_after] = node_judge[node_before]
                     else:
-                        path_dict[node_after] = (path_dict[node_before] + ';' + node_judge[node_before])
+                        path_dict[node_after] = (
+                            path_dict[node_before] + ';' + node_judge[node_before])
                 # 如果上一个节点第二次分裂（上一个节点的条件判断是<）
                 else:
                     # 从根节点到现节点的路径
                     if node_before == 0:
-                        path_dict[node_after] = node_judge[node_before].replace('<=', '>')
+                        path_dict[node_after] = node_judge[node_before].replace(
+                            '<=', '>')
                     else:
                         path_dict[node_after] = (path_dict[node_before] + ';' + node_judge[node_before].
                                                  replace('<=', '>'))
@@ -106,7 +113,8 @@ def get_gbdt_path_var(data, model, y=None, one_hot=True, char_cols=[], precision
             for index in path_dict.keys():
                 # 由于分类变量会进行独热,导致节点的判断为<=0.5/>0.5,将其替换出未独热前的表达方式var ==/!= value
                 for old_judge, new_judge in col_judge_trans.items():
-                    path_dict[index] = path_dict[index].replace(old_judge, new_judge)
+                    path_dict[index] = path_dict[index].replace(
+                        old_judge, new_judge)
 
         # 将衍生变量的节点索引转换成路径
         data_gbdt[n] = data_gbdt[n].map(path_dict)
@@ -151,13 +159,17 @@ def get_data_gbdt(data, gbdt_cols):
             # 数值型的条件
             if ('!=' not in judge) and ('==' not in judge):
                 if (index == 0) and (index != judge_len - 1):
-                    exec_str += ("((data['%s']%s)" % (judge[: judge.find(' ')], judge[judge.find(' '):]))
+                    exec_str += ("((data['%s']%s)" %
+                                 (judge[: judge.find(' ')], judge[judge.find(' '):]))
                 elif (index == 0) and (index == judge_len - 1):
-                    exec_str += ("(data['%s']%s)" % (judge[: judge.find(' ')], judge[judge.find(' '):]))
+                    exec_str += ("(data['%s']%s)" %
+                                 (judge[: judge.find(' ')], judge[judge.find(' '):]))
                 elif index == judge_len - 1:
-                    exec_str += (" & (data['%s']%s))" % (judge[: judge.find(' ')], judge[judge.find(' '):]))
+                    exec_str += (" & (data['%s']%s))" %
+                                 (judge[: judge.find(' ')], judge[judge.find(' '):]))
                 else:
-                    exec_str += (" & (data['%s']%s)" % (judge[: judge.find(' ')], judge[judge.find(' '):]))
+                    exec_str += (" & (data['%s']%s)" %
+                                 (judge[: judge.find(' ')], judge[judge.find(' '):]))
             # 字符型的条件
             else:
                 if '==' in judge:
@@ -167,19 +179,23 @@ def get_data_gbdt(data, gbdt_cols):
 
                 if (index == 0) and (index != judge_len - 1):
                     exec_str += ("((data['%s']%s'%s')" % (
-                        judge[: judge.find(' ')], judge[judge.find(' '): judge.find('=') + offset],
+                        judge[: judge.find(' ')], judge[judge.find(
+                            ' '): judge.find('=') + offset],
                         judge[judge.find('=') + offset:]))
                 elif (index == 0) and (index == judge_len - 1):
                     exec_str += ("(data['%s']%s'%s')" % (
-                        judge[: judge.find(' ')], judge[judge.find(' '): judge.find('=') + offset],
+                        judge[: judge.find(' ')], judge[judge.find(
+                            ' '): judge.find('=') + offset],
                         judge[judge.find('=') + offset:]))
                 elif index == judge_len - 1:
                     exec_str += (" & (data['%s']%s'%s'))" % (
-                        judge[: judge.find(' ')], judge[judge.find(' '): judge.find('=') + offset],
+                        judge[: judge.find(' ')], judge[judge.find(
+                            ' '): judge.find('=') + offset],
                         judge[judge.find('=') + offset:]))
                 else:
                     exec_str += (" & (data['%s']%s'%s')" % (
-                        judge[: judge.find(' ')], judge[judge.find(' '): judge.find('=') + offset],
+                        judge[: judge.find(' ')], judge[judge.find(
+                            ' '): judge.find('=') + offset],
                         judge[judge.find('=') + offset:]))
 
         # 将True/False替换成1/0
@@ -200,7 +216,8 @@ def get_head_rule(X_train_gbdt, Y_train, head=5, cover=0):
         head: 查看前几个规则
         cover: 覆盖率的阈值,筛选覆盖率大于这个阈值的规则
     '''
-    rule_df = pd.DataFrame(columns=['rule', 'cover', 'target'], index=range(X_train_gbdt.shape[1]))
+    rule_df = pd.DataFrame(
+        columns=['rule', 'cover', 'target'], index=range(X_train_gbdt.shape[1]))
     rule_df['rule'] = X_train_gbdt.columns
     data_count = len(Y_train)
     rule_df['cover'] = [round((X_train_gbdt[rule] == 1).sum() / data_count, 4)
@@ -208,7 +225,8 @@ def get_head_rule(X_train_gbdt, Y_train, head=5, cover=0):
     rule_df['target'] = [round(Y_train[X_train_gbdt[rule] == 1].sum() / (X_train_gbdt[rule] == 1).sum(), 4)
                          for rule in X_train_gbdt.columns]
 
-    rule_df = rule_df[rule_df['cover'] >= cover].sort_values('target', ascending=False)
+    rule_df = rule_df[rule_df['cover'] >= cover].sort_values(
+        'target', ascending=False)
     rule_df.index = range(rule_df.shape[0])
 
     print('总样本目标为 1 的样本占比为: %s\n' % round(Y_train.sum() / data_count, 4))
@@ -230,7 +248,8 @@ def get_rule_df(X_train_gbdt, Y_train):
     入参结果如下:
         rule_df: 含有各个规则覆盖率信息、目标占比信息的DataFrame
     '''
-    rule_df = pd.DataFrame(columns=['rule', 'cover', 'target'], index=range(X_train_gbdt.shape[1]))
+    rule_df = pd.DataFrame(
+        columns=['rule', 'cover', 'target'], index=range(X_train_gbdt.shape[1]))
     rule_df['rule'] = X_train_gbdt.columns
     data_count = X_train_gbdt.shape[0]
     rule_df['cover'] = [round((X_train_gbdt[rule] == 1).sum() / data_count, 4)
@@ -280,8 +299,10 @@ def get_lr_model(X_train_gbdt, Y_train, C, random_state=1234):
         Y_valid_fold_proba = lr.predict_proba(X_valid_fold)[:, 1]
         Y_train_fold_proba = lr.predict_proba(X_train_fold)[:, 1]
 
-        valid_auc_list.append(metrics.roc_auc_score(Y_valid_fold, Y_valid_fold_proba))
-        train_auc_list.append(metrics.roc_auc_score(Y_train_fold, Y_train_fold_proba))
+        valid_auc_list.append(metrics.roc_auc_score(
+            Y_valid_fold, Y_valid_fold_proba))
+        train_auc_list.append(metrics.roc_auc_score(
+            Y_train_fold, Y_train_fold_proba))
 
         gc.enable()
         del X_train_fold, Y_train_fold, X_valid_fold, Y_valid_fold, Y_valid_fold_proba, Y_train_fold_proba
@@ -291,7 +312,8 @@ def get_lr_model(X_train_gbdt, Y_train, C, random_state=1234):
     train_auc = np.mean(train_auc_list)
 
     print('在L1正则项系数为 %s 下,训练出的逻辑回归模型共选择了 %s 个变量' % (C, len(cols)))
-    print('交叉验证结果为:  训练集平均AUC: %s  验证集平均AUC: %s\n' % (round(train_auc, 4), round(valid_auc, 4)))
+    print('交叉验证结果为:  训练集平均AUC: %s  验证集平均AUC: %s\n' %
+          (round(train_auc, 4), round(valid_auc, 4)))
 
     print('逻辑回归模型如下:')
     print(('1 / (1 + e^(%s - ' % -intercept + ' - '.join(['%s * X[%s]' % (coef[index], index + 1) for index
@@ -317,10 +339,12 @@ def get_lr_proba(intercept, coef, cols, x, y=None):
     出参结果如下:
         y_proba: 预测概率值
     '''
-    y_proba = x[cols].apply(lambda x: 1 / (1 + pow(np.e, (-intercept - (np.array(x) * np.array(coef)).sum()))), axis=1)
+    y_proba = x[cols].apply(
+        lambda x: 1 / (1 + pow(np.e, (-intercept - (np.array(x) * np.array(coef)).sum()))), axis=1)
 
     if isinstance(y, type(None)) is False:
-        get_ks = lambda y_pred, y_true: ks_2samp(y_pred[y_true == 1], y_pred[y_true != 1]).statistic
+        def get_ks(y_pred, y_true): return ks_2samp(
+            y_pred[y_true == 1], y_pred[y_true != 1]).statistic
         auc = metrics.roc_auc_score(y, y_proba)
         ks = get_ks(y_proba, y)
 

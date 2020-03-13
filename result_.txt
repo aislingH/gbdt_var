@@ -1,0 +1,90 @@
+Logistic Regression
+在L1正则项系数为 0.005 下, 训练出的逻辑回归模型共选择了 21 个变量
+交叉验证结果为:  训练集平均AUC: 0.8148  验证集平均AUC: 0.8124
+
+LR + GBDT_VAR
+在L1正则项系数为 0.005 下, 训练出的逻辑回归模型共选择了 10 个变量
+交叉验证结果为:  训练集平均AUC: 0.813  验证集平均AUC: 0.8123
+
+
+逻辑回归模型如下:
+1 / (1 + e ^ (-0.0 + 0.026391243130634973 * X[1] + 0.00021962800806765977 * X[2] - 0.02188762266803948 * X[3] - 0.06881028254206846 * X[4] + 0.27952335552550794 * X[5] + 9.971149967967989e-08 * X[6] - 0.012883462757482483 * X[7] - 0.033074017994419926 * X[8] - 0.0009849863605612967 * X[9] + 0.007629541288783529 * X[10] +
+              0.09034608521904562 * X[11] - 0.13027040934914608 * X[12] + 0.1169977276723592 * X[13] + 0.1097299846615754 * X[14] - 2.5169893758309575e-05 * X[15] + 0.022922217211080242 * X[16] - 2.4041479234781323e-05 * X[17] + 0.018550977590793234 * X[18] - 0.023374498695886103 * X[19] + 0.03541148388473312 * X[20] - 0.26065344376344624 * X[21]))
+
+各变量对应关系如下
+X[1] == > c_XJCOM_da_od_cnt_H1_trt
+X[2] == > m_fopen_to_buy1N_H1_trt
+X[3] == > sms_dlq_sms_cnt_MAX03M_trt
+X[4] == > c_foverdue_payed_day_NCI06M_trt
+X[5] == > c_foverdue_paying_cyc_MSN03M_trt
+X[6] == > m_od_nf_brw_MAX06M_trt
+X[7] == > fgd_od_cnt_TOT03M_s1s5_C_trt
+X[8] == > m_ever_dlq7p_cnt_NCI06M_trt
+X[9] == > c_foverdue_payedday_AVG03M_trt
+X[10] == > M_FOPEN_TO_BUY1N_AVG06M_sqrt_trt
+X[11] == > pboc_loan_cnt_MSN06M_trt
+X[12] == > m_ever_dlq7p_cnt_CAV06M_trt
+X[13] == > wdohr_loan_cnt_MSN06M_trt
+X[14] == > c_acre_repay_od_cptF_NUM06M_trt
+X[15] == > c_fopen_to_buy1N_AVG06M_trt
+X[16] == > sce_od_tot_cnt_MSN06M_trt
+X[17] == > M_FOPEN_TO_BUY1N_AVG06M_trt
+X[18] == > m_od_cnt_AVG03M_trt
+X[19] == > fgd_od_cnt_TOT03M_s6_C_trt
+X[20] == > fage_trt
+X[21] == > fage_s6_W_trt
+AUC: 0.8212  KS: 0.483
+[Finished in 7.8s]
+
+
+LR + GBDT_VAR
+在L1正则项系数为 0.005 下, 训练出的逻辑回归模型共选择了 10 个变量
+交叉验证结果为:  训练集平均AUC: 0.813  验证集平均AUC: 0.8123
+
+逻辑回归模型如下:
+1 / (1 + e ^ (2.410510418189686 + 0.11294205590609584 * X[1] + 0.4831876378950773 * X[2] + 0.026303150164320437 * X[3] + 0.002048990428198405 * X[4] +
+              0.4016060722879342 * X[5] + 0.7183501827085963 * X[6] + 0.298784636456405 * X[7] + 0.3142802709488234 * X[8] + 0.3814349073714723 * X[9] + 0.04509156683794613 * X[10]))
+
+各变量对应关系如下
+X[1] == > m_ever_dlq7p_cnt_CAV06M_trt <= 1.005171
+m_fopen_to_buy1N_H1_trt > 1609.195007
+c_foverdue_paying_cyc_MSN03M_trt > 1.5
+m_fopen_to_buy1N_H1_trt > 3712.930054
+X[2] == > m_ever_dlq7p_cnt_CAV06M_trt <= 1.005171
+m_fopen_to_buy1N_H1_trt > 1533.860046
+fgd_od_cnt_TOT06M_s2s3_C_trt <= 7.5
+c_foverdue_payedday_AVG03M_trt <= 9.833333
+X[3] == > m_ever_dlq7p_cnt_LTR0306M_trt <= 0.971151
+m_fopen_to_buy1N_H1_trt <= 2159.915039
+m_foverdue_payed_day_MCI03M_trt <= 0.5
+fage_trt <= 25.5
+X[4] == > m_ever_dlq7p_cnt_LTR0306M_trt <= 0.971151
+m_fopen_to_buy1N_H1_trt > 2159.915039
+pboc_loan_cnt_MSN06M_trt > 0.5
+fgd_od_cnt_TOT03M_s6_C_trt <= 2.5
+X[5] == > m_ever_dlq7p_cnt_CAV03M_trt <= 1.012744
+c_foverdue_payingcyc_CMX03M_trt <= 0.1625
+fgd_od_cnt_TOT03M_s1s5_C_trt <= 4.5
+m_futi_gre90_trt <= 3.5
+X[6] == > m_ever_dlq7p_cnt_LTR0306M_trt <= 0.955534
+m_bal_CMX03M_trt <= 0.931267
+c_foverdue_paying_cyc_MSN03M_trt > 1.5
+pboc_loan_cnt_MSN06M_trt > 0.5
+X[7] == > c_foverdue_payingcyc_CMX03M_trt <= 0.1625
+fgd_od_cnt_TOT06M_s2s3_C_trt <= 8.5
+m_futi_gre90_trt <= 3.5
+c_acre_repay_od_cptF_NUM06M_trt > 0.5
+X[8] == > m_ever_dlq7p_cnt_LTR0306M_trt <= 0.955534
+m_bal_CMX03M_trt > 0.931267
+c_foverdue_payed_day_NCI06M_s1_W_trt > 0.331555
+fother_loan_cnt_NCI06M_trt <= 1.5
+X[9] == > c_foverdue_payingcyc_CMX03M_trt <= 0.1625
+fgd_od_cnt_TOT03M_s1s5_C_trt <= 4.5
+wdohr_loan_cnt_MSN06M_trt > 3.5
+fage_trt <= 25.5
+X[10] == > c_foverdue_payingcyc_CMX03M_trt <= 0.1625
+m_fopen_to_buy1N_H1_trt <= 3356.674927
+fage_trt <= 26.5
+fgd_od_cnt_TOT03M_s1s5_C_trt <= 15.5
+AUC: 0.8224  KS: 0.5021
+[Finished in 6.1s]
